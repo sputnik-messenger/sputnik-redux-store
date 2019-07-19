@@ -1,0 +1,20 @@
+name: sputnik_redux_store
+description: The redux store, used by Sputnik Messenger
+version: 0.0.1
+author:
+homepage:
+
+environment:
+  sdk: ">=2.2.2 <3.0.0"
+
+dependencies:
+  built_value: ^6.6.0
+  redux: 3.0.0
+  quiver: '>=2.0.0 <3.0.0'
+  matrix_rest_api:
+    path: ../matrix_rest_api
+  sputnik_app_state:
+    path: ../sputnik_app_state
+
+
+dev_dependencies:
