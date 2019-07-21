@@ -40,7 +40,8 @@ class ReactionsMapBuilder {
             mapBuilder.updateValue(
                 toEventId,
                 (v) => v.rebuild(
-                      (b) => b.updateValue(key, (v) => v.rebuild((b) => b.add(event)), ifAbsent: () => BuiltList<RoomEvent>.from([event])),
+                      (b) => b.updateValue(key, (v) => v.contains(event) ? v : v.rebuild((b) => b.add(event)),
+                          ifAbsent: () => BuiltList<RoomEvent>.from([event])),
                     ),
                 ifAbsent: () => BuiltMap<String, BuiltList<RoomEvent>>.build((b) => b[key] = BuiltList<RoomEvent>.from([event])));
           }
