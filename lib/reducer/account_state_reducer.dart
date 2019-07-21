@@ -185,7 +185,7 @@ class AccountStateReducer {
       }
     }
 
-    final newLastRelevant = timeline.lastWhere((e) => e.type == 'm.room.message', orElse: () => null);
+    final newLastRelevant = timeline.lastWhere(EventFilter.isRelevant, orElse: () => null);
     if (b.lastRelevantRoomEvent == null ||
         (newLastRelevant != null && newLastRelevant.origin_server_ts >= b.lastRelevantRoomEvent.origin_server_ts)) {
       b.lastRelevantRoomEvent = newLastRelevant;
@@ -279,9 +279,11 @@ class AccountStateReducer {
     StateEventBuilder<T> latest = null;
     if (candidate != null && (current?.roomEvent == null || candidate.origin_server_ts >= current.roomEvent.origin_server_ts)) {
       latest = util.stateEventBuilderFrom<T>(candidate);
-    } else if (current?.roomEvent != null) { {
-      latest = current;
-    }}
+    } else if (current?.roomEvent != null) {
+      {
+        latest = current;
+      }
+    }
     return latest;
   }
 }
