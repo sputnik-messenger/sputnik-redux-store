@@ -268,6 +268,7 @@ class AccountStateReducer {
     b.create = getLatestOf(b.create, stateMap[util.types.create], util);
     b.canonicalAlias = getLatestOf(b.canonicalAlias, stateMap[util.types.canonical_alias], util);
     b.powerLevels = getLatestOf(b.powerLevels, stateMap[util.types.power_levels], util);
+    b.tombstone = getLatestOf(b.tombstone, stateMap[util.types.tombstone], util);
   }
 
   static StateEventBuilder<T> getLatestOf<T>(
