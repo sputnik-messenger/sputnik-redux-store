@@ -1,4 +1,5 @@
 import 'package:matrix_rest_api/matrix_client_api_r0.dart';
+import 'package:sputnik_app_state/sputnik_app_state.dart';
 
 class RedactionUtil {
   static RoomEvent redact(RoomEvent roomEvent, RoomEvent redaction) {

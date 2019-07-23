@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   built_value: ^6.6.0
+  built_collection: ^4.2.2
   redux: 3.0.0
   quiver: '>=2.0.0 <3.0.0'
   matrix_rest_api:

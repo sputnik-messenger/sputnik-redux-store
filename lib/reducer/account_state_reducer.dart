@@ -3,6 +3,7 @@ import 'package:sputnik_app_state/sputnik_app_state.dart';
 import 'package:sputnik_redux_store/actions/account_state_actions.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:sputnik_redux_store/util/event_filter.dart';
+import 'package:sputnik_redux_store/util/event_partition_util.dart';
 import 'package:sputnik_redux_store/util/reactions_map_builder.dart';
 import 'package:sputnik_redux_store/util/redeaction_util.dart';
 import 'package:sputnik_redux_store/util/supported_state_event_util.dart';
@@ -16,9 +17,11 @@ class AccountStateReducer {
       b.accountSummaries.updateValue(userId, (v) => v.rebuild((b) => b.nextBatchSyncToken = syncResponse.next_batch));
       b.accountStates.updateValue(
           userId,
-          (v) => v.rebuild((b) => b
-            ..roomStates.update((b) => updateRoomStatesFromSyncResponse(b, syncResponse))
-            ..roomSummaries.update((b) => updateRoomSummariesFromSyncResponse(b, syncResponse))));
+              (v) =>
+              v.rebuild((b) =>
+              b
+                ..roomStates.update((b) => updateRoomStatesFromSyncResponse(b, syncResponse))
+                ..roomSummaries.update((b) => updateRoomSummariesFromSyncResponse(b, syncResponse))));
     });
   }
 
@@ -27,8 +30,9 @@ class AccountStateReducer {
     final roomState = action.roomState;
     final roomId = roomState.roomId;
 
-    return state.rebuild((stateBuilder) => stateBuilder.accountStates
-        .updateValue(userId, (v) => v.rebuild((b) => b.roomStates.updateValue(roomId, (v) => roomState, ifAbsent: () => roomState))));
+    return state.rebuild((stateBuilder) =>
+        stateBuilder.accountStates
+            .updateValue(userId, (v) => v.rebuild((b) => b.roomStates.updateValue(roomId, (v) => roomState, ifAbsent: () => roomState))));
   }
 
   static SputnikAppState onUnloadRoomState(SputnikAppState state, UnloadRoomState action) {
@@ -36,10 +40,11 @@ class AccountStateReducer {
     final roomId = action.roomId;
 
     return state.rebuild(
-      (stateBuilder) => stateBuilder.accountStates.updateValue(
-        userId,
-        (v) => v.rebuild((b) => b.roomStates.remove(roomId)),
-      ),
+          (stateBuilder) =>
+          stateBuilder.accountStates.updateValue(
+            userId,
+                (v) => v.rebuild((b) => b.roomStates.remove(roomId)),
+          ),
     );
   }
 
@@ -48,14 +53,16 @@ class AccountStateReducer {
     final roomId = action.roomId;
     final messagesResponse = action.roomMessagesResponse;
 
-    return state.rebuild((b) => b.accountStates.updateValue(
-        userId,
-        (v) => v.rebuild((b) {
-              b.roomSummaries.updateValue(roomId, (v) => updateRoomSummaryFromRoomMessagesResponse(v, messagesResponse));
-              if (b.roomStates[roomId] != null) {
-                b.roomStates.updateValue(roomId, (v) => updateRoomStateFromRoomMessagesResponse(v, messagesResponse));
-              }
-            })));
+    return state.rebuild((b) =>
+        b.accountStates.updateValue(
+            userId,
+                (v) =>
+                v.rebuild((b) {
+                  b.roomSummaries.updateValue(roomId, (v) => updateRoomSummaryFromRoomMessagesResponse(v, messagesResponse));
+                  if (b.roomStates[roomId] != null) {
+                    b.roomStates.updateValue(roomId, (v) => updateRoomStateFromRoomMessagesResponse(v, messagesResponse));
+                  }
+                })));
   }
 
   static SputnikAppState onLoadedTimelineTailFromDb(SputnikAppState state, OnLoadedTimelineTailFromDb action) {
@@ -65,17 +72,21 @@ class AccountStateReducer {
     final members = action.members;
 
     final newEntries =
-        events.where(EventFilter.onlyUserVisible).map((event) => TimelineEventState.fromEvent(event)).map((s) => MapEntry(s.event.event_id, s));
-    return state.rebuild((b) => b.accountStates.updateValue(
-        userId,
-        (v) => v.rebuild((b) => b.roomStates.updateValue(
-              roomId,
-              (v) => v.rebuild((b) {
-                b.timelineEventStates.addEntries(newEntries);
-                b.roomMembers.addAll(members);
-                updateReactionsFromEvents(b.reactions, events);
-              }),
-            ))));
+    events.where(EventFilter.onlyUserVisible).map((event) => TimelineEventState.fromEvent(event)).map((s) => MapEntry(s.event.event_id, s));
+    return state.rebuild((b) =>
+        b.accountStates.updateValue(
+            userId,
+                (v) =>
+                v.rebuild((b) =>
+                    b.roomStates.updateValue(
+                      roomId,
+                          (v) =>
+                          v.rebuild((b) {
+                            b.timelineEventStates.addEntries(newEntries);
+                            b.roomMembers.addAll(members);
+                            updateReactionsFromEvents(b.reactions, events);
+                          }),
+                    ))));
   }
 
   static SputnikAppState onLoadedUserSummariesFromDb(SputnikAppState state, OnLoadedUserSummariesFromDb action) {
@@ -85,8 +96,10 @@ class AccountStateReducer {
 
     SputnikAppState newState = state;
     if (state.accountStates[userId].roomStates[roomId] != null) {
-      newState = state.rebuild((b) => b.accountStates
-          .updateValue(userId, (v) => v.rebuild((b) => b.roomStates.updateValue(roomId, (v) => v.rebuild((b) => b.roomMembers.addAll(members))))));
+      newState = state.rebuild((b) =>
+          b.accountStates
+              .updateValue(
+              userId, (v) => v.rebuild((b) => b.roomStates.updateValue(roomId, (v) => v.rebuild((b) => b.roomMembers.addAll(members))))));
     }
     return newState;
   }
@@ -163,14 +176,13 @@ class AccountStateReducer {
     return b.build();
   }
 
-  static void updateRoomSummaryFromEvents(
-    ExtendedRoomSummaryBuilder b,
-    List<RoomEvent> state,
-    List<RoomEvent> timeline,
-    String previousBatchToken, {
-    UnreadNotificationCounts unreadNotificationCounts,
-    RoomSummary roomSummary,
-  }) {
+  static void updateRoomSummaryFromEvents(ExtendedRoomSummaryBuilder b,
+      List<RoomEvent> state,
+      List<RoomEvent> timeline,
+      String previousBatchToken, {
+        UnreadNotificationCounts unreadNotificationCounts,
+        RoomSummary roomSummary,
+      }) {
     b.previousBatchToken = previousBatchToken;
 
     if (unreadNotificationCounts != null) {
@@ -198,22 +210,32 @@ class AccountStateReducer {
   }
 
   static void updateRoomStateFromEvents(RoomStateBuilder b, Iterable<RoomEvent> state, Iterable<RoomEvent> timeline) {
-    final mappedTimeline = timeline.where(EventFilter.onlyUserVisible).map((e) => TimelineEventState.fromEvent(e));
+    final redactionOrNot = EventPartitionUtil.partition<bool, RoomEvent>(timeline, (e) => e.isRedaction);
+    final redactions = redactionOrNot.getPartition(true);
+    final nonRedactions = redactionOrNot.getPartition(false);
+
+    final mappedTimeline = nonRedactions.where(EventFilter.onlyUserVisible).map((e) => TimelineEventState.fromEvent(e));
 
     b.timelineEventStates.addIterable(mappedTimeline, key: (TimelineEventState s) => s.event.event_id);
-    for (RoomEvent redaction in timeline.where((e) => e.redacts != null)) {
-      if (b.timelineEventStates[redaction.redacts] != null) {
-        b.timelineEventStates.updateValue(
-          redaction.redacts,
-          (v) => v.rebuild((b) => b.event = RedactionUtil.redact(b.event, redaction)),
-        );
-      }
-    }
 
     final mapBuilder = b.roomMembers;
     updateRoomMembersFromStateEvents(mapBuilder, state);
     updateRoomMembersFromStateEvents(mapBuilder, timeline.where((e) => e.isStateEvent));
-    updateReactionsFromEvents(b.reactions, timeline);
+    updateReactionsFromEvents(b.reactions, nonRedactions);
+    applyRedactions(b, redactions);
+  }
+
+  static void applyRedactions(RoomStateBuilder b, Iterable<RoomEvent> redactions) {
+    for (RoomEvent redaction in redactions) {
+      if (b.timelineEventStates[redaction.redacts] != null) {
+        b.timelineEventStates.updateValue(
+          redaction.redacts,
+              (v) => v.rebuild((b) => b.event = RedactionUtil.redact(b.event, redaction)),
+        );
+      } else {
+        Reactions.removeReactionById(b.reactions, redaction.redacts);
+      }
+    }
   }
 
   static updateRoomMembersFromStateEvents(MapBuilder<String, UserSummary> members, Iterable<RoomEvent> state) {
@@ -249,8 +271,8 @@ class AccountStateReducer {
     }
   }
 
-  static updateReactionsFromEvents(MapBuilder<String, BuiltMap<String, BuiltList<RoomEvent>>> reactionMap, Iterable<RoomEvent> reactions) {
-    ReactionsMapBuilder.update(reactionMap, reactions);
+  static updateReactionsFromEvents(ReactionsBuilder reactionsBuilder, Iterable<RoomEvent> reactions) {
+    ReactionsMapBuilder.putReactions(reactionsBuilder, reactions);
   }
 
   static void updateRoomStateValues(RoomStateValuesBuilder b, Iterable<RoomEvent> stateEvents) {
@@ -271,11 +293,9 @@ class AccountStateReducer {
     b.tombstone = getLatestOf(b.tombstone, stateMap[util.types.tombstone], util);
   }
 
-  static StateEventBuilder<T> getLatestOf<T>(
-    StateEventBuilder<T> current,
-    RoomEvent candidate,
-    SupportedStateEventUtil util,
-  ) {
+  static StateEventBuilder<T> getLatestOf<T>(StateEventBuilder<T> current,
+      RoomEvent candidate,
+      SupportedStateEventUtil util,) {
     StateEventBuilder<T> latest = null;
     if (candidate != null && (current?.roomEvent == null || candidate.origin_server_ts >= current.roomEvent.origin_server_ts)) {
       latest = util.stateEventBuilderFrom<T>(candidate);
